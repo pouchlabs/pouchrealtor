@@ -1,0 +1,19 @@
+body{
+    margin: 0;
+    box-sizing: border-box;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background-color: rgba(238, 243, 238, 0.133);
+}
+.message{
+    box-shadow: 0px 3px 15px #d1cfcf;
+    max-width: 40%;
+    width: auto;
+    margin: auto;
+    border-radius: 10px ;
+    padding: 0.4rem;
+    margin-top: 4px;
+    margin-bottom: 5px;
+    background-color: white;
+  }

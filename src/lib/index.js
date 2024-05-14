@@ -1,6 +1,3 @@
-import PouchRealtor  from "./core/entry.js"; 
-
-const realtor  =   PouchRealtor; 
-
-
-export default  realtor;
+import {createRealtor}  from "./core/entry.js"; 
+import { CreateClient } from "./client/realtor.js";
+export {createRealtor,CreateClient};

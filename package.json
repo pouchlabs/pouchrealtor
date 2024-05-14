@@ -1,10 +1,30 @@
 {
 	"name": "@pouchlab/realtor",
 	"version": "1.0.0",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/pouchlabs/pouchrealtor.git"
+	},
+	"bugs": {
+		"url": "https://github.com/pouchlabs/pouchrealtor/issues"
+	},
+	"author": {
+		"name": "pouchlabs"
+	},
+	"contributors": [
+		{
+			"name": "pouchlabs"
+		}
+	],
+	"sponsor": {
+		"url": "https://ko-fi.com/pouchlabs"
+	},
+	"description": "a blazing fast socket.io alternative,pure websockets",
 	"scripts": {
 		"dev": "vite dev",
+		"start": "node server.js",
 		"build": "vite build && npm run package",
-		"preview": "vite preview",
+		"preview": "node server.js",
 		"package": "svelte-kit sync && svelte-package && publint",
 		"prepublishOnly": "npm run package",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json",
@@ -14,7 +34,7 @@
 		"format": "prettier --write .",
 		"test:integration": "playwright test",
 		"test:unit": "vitest",
-		"dev:server": "node  --watch ./src/lib/bin/pouchrealtor.js"
+		"dev:server": "node  --watch --trace-warnings ./src/lib/bin/pouchrealtor.js && dev"
 	},
 	"exports": {
 		".": {
@@ -27,12 +47,10 @@
 		"!dist/**/*.test.*",
 		"!dist/**/*.spec.*"
 	],
-	"peerDependencies": {
-		"svelte": "^4.0.0"
-	},
 	"devDependencies": {
 		"@playwright/test": "^1.28.1",
 		"@sveltejs/adapter-auto": "^3.0.0",
+		"@sveltejs/adapter-node": "^5.0.1",
 		"@sveltejs/kit": "^2.0.0",
 		"@sveltejs/package": "^2.0.0",
 		"@sveltejs/vite-plugin-svelte": "^3.0.0",
@@ -57,20 +75,20 @@
 	"type": "module",
 	"dependencies": {
 		"@msgpack/msgpack": "^3.0.0-beta2",
-		"conf": "^12.0.0",
+		"detect-port": "^1.5.1",
 		"esm-env": "^1.0.0",
 		"eventemitter3": "^5.0.1",
+		"is-online": "^10.0.0",
 		"isomorphic-ws": "^5.0.0",
-		"localforage": "^1.10.0",
+		"kleur": "^4.1.5",
 		"lowdb": "^7.0.1",
+		"ms": "^2.1.3",
 		"nanoid": "^5.0.6",
 		"polka": "^0.5.2",
-		"queue": "^7.0.0",
-		"sirv": "^2.0.4",
 		"valibot": "^0.30.0",
 		"ws": "^8.16.0"
 	},
-	"bin": {
-		"pouchrealtor": " ./lib/bin/pouchrealtor.js"
-	}
+	"keywords": [
+		"realtime,ws,sync,pub sub,websocket,socket.io,realtor"
+	]
 }
