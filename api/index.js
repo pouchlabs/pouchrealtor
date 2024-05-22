@@ -1,7 +1,7 @@
-import {createRealtor} from "./dist/index.js";
+import {createRealtor} from "../dist/index.js";
 import polka from "polka";
-import {handler} from './build/handler.js'
-import { logSucces} from './dist/utils/index.js';
+import {handler} from '../build/handler.js'
+import { logSucces} from '../dist/utils/index.js';
    const server = polka({
       onError:async (err,req,res)=>{
          if(err){
