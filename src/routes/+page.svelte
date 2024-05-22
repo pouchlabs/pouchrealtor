@@ -9,7 +9,7 @@ import {writable} from 'svelte/store';
 
     let arr = new ArrayBuffer()
    arr = [1,2,3,5] 
-      let client = CreateClient('ws://127.0.0.1:5554/chat')
+      let client = CreateClient('ws://0.0.0.0:5554/chat')
     
     onMount(async ()=> { 
   user= writable({id:nanoid(16),av:Avataaars.create({
