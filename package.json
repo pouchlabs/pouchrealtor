@@ -23,7 +23,7 @@
 	"scripts": {
 		"dev": "vite dev",
 		"start": "node server.js",
-		"build": "vite build && npm run package",
+		"build": "vite build && npm run package && npm start",
 		"preview": "node server.js",
 		"package": "svelte-kit sync && svelte-package && publint",
 		"prepublishOnly": "npm run package",
