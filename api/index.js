@@ -18,7 +18,7 @@ import { logSucces} from '../dist/utils/index.js';
           }
           
       }
-   }).listen(5554,'127.0.0.1',(err)=>{
+   }).listen(5554,'0.0.0.0',(err)=>{
       if(err){
          return
       }
