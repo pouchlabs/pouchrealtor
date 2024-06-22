@@ -60,9 +60,6 @@ let client = createClient('ws://localhost:3000/chat')//ws or wss only
 
 ```
 
-## docs
-for more usage [docs](https://pouchrealtor.vercel.app)
-
 # support
  if you like pouchrealtor,help maintain its development
  
