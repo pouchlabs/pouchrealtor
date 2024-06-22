@@ -1,7 +1,14 @@
 # pouchrealtor
- blazing fast socket.io alternative,pure websockets.
+ 
+blazing fast socket.io alternative,pure websockets.
 
 its a pure websocket for nodejs and browser,draws inspiration from socket.io.if you know socket.io you already know pouchrealtor
+
+# features
+* pure websockets
+* blazing fast
+* works in nodejs and browser
+* easy rooms logic
 
 
 ## install
@@ -12,12 +19,12 @@ its a pure websocket for nodejs and browser,draws inspiration from socket.io.if 
 ## server usage
 
 ```js
- import {createRealtor} from '@pouchlab/realtor';
+ import {CreateRealtor} from '@pouchlab/realtor';
 import express from 'express';
  //with express
  const app = express()
 
- const realtime = createRealtor({server:app})//expects object
+ const realtime = CreateRealtor({server:app})//expects object
  console.log(realtime)
 
  //room
@@ -40,7 +47,7 @@ import express from 'express';
 ## client usage
 
 ```js
- import {createClient} from '@pouchlab/realtor';
+ import {CreateClient} from '@pouchlab/realtor';
 
 let client = createClient('ws://localhost:3000/chat')//ws or wss only
  //events
@@ -54,7 +61,7 @@ let client = createClient('ws://localhost:3000/chat')//ws or wss only
 ```
 
 ## docs
-for more usage [docs](https://pouchrealtor.vercel.app)
+for more usage work in progress
 
 # support
  if you like pouchrealtor,help maintain its development
