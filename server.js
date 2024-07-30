@@ -1,42 +1,23 @@
-import {createRealtor} from "./dist/index.js";
+import {createRealtor} from "./src/lib/index.js";
 import polka from "polka";
 import {handler} from './build/handler.js'
 import { logSucces} from './dist/utils/index.js';
-   const server = polka({
-      onError:async (err,req,res)=>{
-         if(err){
-            res.statusCode = 400;
-            res.end('400 oops error occured')
-            return 
-         }
-      },
-      onNoMatch:async (err,req,res,next)=>{
-          if(err){
-            res.statusCode = 404
-            res.end('404 not found')
-            return
-          }
-          
-      }
-   }).listen(5554,'0.0.0.0',(err)=>{
-      if(err){
-         return
-      }
-      logSucces(5554)
+  
       
-      server.use(handler)
-      
-let app = createRealtor({server:server.server})
+let app = createRealtor({port:4000}); 
 
-let chat = new app.Room('/chat');
+let chat = new app.Room('/sync');
 
 chat.conect((socket)=>{
    
-   socket.on('message',res =>{
-      
+   socket.on('full-sync',res =>{ 
+       console.log(res.data)
       res.broadcast('messages',res.data,()=>{
        
       })
+   })
+   socket.on("collection-change",(res)=>{
+      console.log(res.data) 
    })
   socket.on('join',(res)=>{
     res.broadcastAll('join_user',res.data,()=>{
@@ -51,9 +32,7 @@ chat.conect((socket)=>{
   
    
 }) 
-chat.onError((e)=>{   
-   console.log(e)
-})
-   });
+
+
 
 

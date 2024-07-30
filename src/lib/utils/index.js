@@ -42,7 +42,7 @@ async function decodeFromBlob(blob) {
 }
 
 function logSucces(port){
-  let msg = `[${kleur.bold().green('pouchrealtor')}]: server listening on ${kleur.blue(port)} `
+  let msg = `[${kleur.bold().green('pouchrealtor')}]: server listening on: \nws://localhost:${kleur.blue(port)} \nwss://localhost:${kleur.blue(port)} `
   console.log(msg)
 }
 function logError(err){

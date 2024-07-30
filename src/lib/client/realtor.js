@@ -1,5 +1,4 @@
 import WebSocket from "isomorphic-ws";
-import { url } from "valibot";
 import EventEmitter from "eventemitter3";
 import { encode} from "@msgpack/msgpack";
 import { checktype,decodeFromBlob } from "../utils/index.js"; 
@@ -51,17 +50,16 @@ const openSocket = (wsURL, waitTimer, waitSeed, multiplier,id) =>{
         ws.close() 
         Emmiter.emit('close',`connection closed to: ${ws.url}`)
         openSocket(ws.url, waitTimer, waitSeed, multiplier);
-        
-      };
-      
-      
+      };  
   };
   return ws
 }
+
 function CreateClient(uri){
  let validurl; 
-if(url()._parse(uri.trim().toString()).output && url()._parse(uri.trim().toString()).output.length > 0){
-  validurl = url()._parse(uri).output;
+ let regex = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/
+if( regex.test(uri) && uri.length > 0){
+  validurl = uri;
 let client = {};
 client.id=id;
 let ws = openSocket(validurl, 1000, 1000, 2,id)  
@@ -125,7 +123,6 @@ let ws = openSocket(validurl, 1000, 1000, 2,id)
       })
     } 
   }
-
   client.checkNet = checkNet
   return client
 }

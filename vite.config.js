@@ -5,6 +5,8 @@ export default defineConfig({
 	server:{
 		port:4000
 	},
+         build:{
+          rollupOptions:{external:"valibot"}},
 	plugins: [sveltekit()],
 	test: {
 		include: ['src/**/*.{test,spec}.{js,ts}']

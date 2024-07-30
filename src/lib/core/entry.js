@@ -1,11 +1,13 @@
-import polka from 'polka';
 import detect from 'detect-port';
 import { WebSocketServer } from 'ws';
 import EventEmitter from 'eventemitter3';
 import {conect} from './room.js';
 import { checktype,logSucces,logError} from '../utils/index.js';
 import { nanoid } from 'nanoid';
-let app = polka();
+import http from "http";
+
+
+let app = http.createServer();
 const wss = new WebSocketServer({noServer:true});
 let Emmiter = new EventEmitter();
 
@@ -38,14 +40,14 @@ function createRealtor(opts){
       //init new server
       detect(port)
       .then(_port => {
-    if (port == _port) {
+    if(port === _port) {
       //port not occupied
       app.listen(port,'127.0.0.1',(err)=>{
          if(err){
           logError(err)
           return
          }//handle upgrade
-         app.server.on('upgrade', function upgrade(request,socket, head) {
+         app.on('upgrade', function upgrade(request,socket, head) {
           //middlewares soon
             wss.handleUpgrade(request,socket, head, async function done(ws) {
               wss.emit('connection',await genId(ws,request), request);
@@ -53,10 +55,7 @@ function createRealtor(opts){
           });
           //log
          logSucces(port)
-        })
-
-     
-       
+        }) 
     } else { 
       //try another port
       app.listen(_port,'127.0.0.1',(err)=>{
@@ -64,14 +63,14 @@ function createRealtor(opts){
          logError(err)
          return
         }//handle upgrade
-        app.server.on('upgrade', function upgrade(request, socket, head) {
+        app.on('upgrade', function upgrade(request, socket, head) {
            wss.handleUpgrade(request,socket, head, async function done(ws) {
              wss.emit('connection', await genId(ws,request), request);
            });
          });
          //log
         logSucces(_port)
-       })
+       }) 
 
     
     }//
