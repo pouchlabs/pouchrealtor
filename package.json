@@ -1,6 +1,6 @@
 {
 	"name": "@pouchlab/realtor",
-	"version": "1.0.3",
+	"version": "2.0.1",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/pouchlabs/pouchrealtor.git"
@@ -39,7 +39,8 @@
 	"exports": {
 		".": {
 			"types": "./dist/index.d.ts",
-			"import": "./dist/index.js"
+			"import": "./dist/index.js",
+			"client": "./dist/client/realtor.js"
 		}
 	},
 	"files": [
@@ -59,7 +60,6 @@
 		"eslint": "^8.56.0",
 		"eslint-config-prettier": "^9.1.0",
 		"eslint-plugin-svelte": "^2.35.1",
-		"polka": "^0.5.2",
 		"prettier": "^3.1.1",
 		"prettier-plugin-svelte": "^3.1.2",
 		"publint": "^0.1.9",
@@ -76,19 +76,18 @@
 	"type": "module",
 	"dependencies": {
 		"@msgpack/msgpack": "^3.0.0-beta2",
-		"detect-port": "^1.5.1",
 		"esm-env": "^1.0.0",
 		"eventemitter3": "^5.0.1",
+		"fasteejs": "^1.0.0",
 		"is-online": "^10.0.0",
 		"isomorphic-ws": "^5.0.0",
 		"kleur": "^4.1.5",
-		"ms": "^2.1.3",
+		"msgpack-lite": "^0.1.26",
 		"nanoid": "^5.0.6",
-		"valibot": "^0.36.0",
-		"ws": "^8.16.0",
-		"zod": "^3.23.8"
+		"node-persist": "^4.0.3",
+		"ws": "^8.16.0"
 	},
 	"keywords": [
-		"realtime,ws,sync,pub sub,websocket,socket.io,realtor"
+		"realtime,ws,sync,pub sub,websocket,socket.io,realtorjs"
 	]
 }

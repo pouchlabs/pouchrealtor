@@ -19,12 +19,12 @@ its a pure websocket for nodejs and browser,draws inspiration from socket.io.if 
 ## server usage
 
 ```js
- import {CreateRealtor} from '@pouchlab/realtor';
+ import {Realtor} from '@pouchlab/realtor';
 import express from 'express';
  //with express
  const app = express()
 
- const realtime = CreateRealtor({server:app})//expects object
+ const realtime = new Realtor({server:app})//expects object
  console.log(realtime)
 
  //room
@@ -35,8 +35,8 @@ import express from 'express';
  chatroom.emit('welcome',{msg:'hi from server'},(res)=>{
     console.log(res)
  })
- chatroom.on('welcome',(res)=>{
-    console.log(res)
+ chatroom.on('welcome',(socket)=>{
+    console.log(socket)
  })
 
 
@@ -61,7 +61,7 @@ let client = createClient('ws://localhost:3000/chat')//ws or wss only
 ```
 
 # support
- if you like pouchrealtor,help maintain its development
+ if you like pouchrealtor,help maintain its development,this keeps the maintainer motivated
  
 [donate](https://ko-fi.com/pouchlabs)
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/H2H3XBF9G) 

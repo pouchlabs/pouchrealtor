@@ -1,4 +1,4 @@
-import {createRealtor} from "../dist/index.js";
+import {Realtor} from "../dist/index.js";
 import polka from "polka";
 import {handler} from '../build/handler.js'
 import { logSucces} from '../dist/utils/index.js';

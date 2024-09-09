@@ -9,10 +9,10 @@ import {writable} from 'svelte/store';
 
     let arr = new ArrayBuffer()
    arr = [1,2,3,5] 
-      let client = CreateClient('wss://pouchrealtor.onrender.com/chat')
+      let client = CreateClient('ws://localhost:3000/sync')
     
     onMount(async ()=> { 
-  user= writable({id:nanoid(16),av:Avataaars.create({
+  user= writable({id:await client.getInfo().device_id,av:Avataaars.create({
     eyes: "wink",
     clothing: "hoodie",
     hair: "dreads",
@@ -60,7 +60,8 @@ client.onConnecting(()=>{
 }) 
 
 client.onConnected(async ()=>{
- client.emit('join',$user,(res)=>{
+  console.log("conected")
+ client.emit('join',{},(res)=>{
    if(res.iserror){
     console.log('error on emit')
    }

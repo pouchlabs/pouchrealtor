@@ -1,124 +1,296 @@
-import detect from 'detect-port';
 import { WebSocketServer } from 'ws';
 import EventEmitter from 'eventemitter3';
-import {conect} from './room.js';
-import { checktype,logSucces,logError} from '../utils/index.js';
-import { nanoid } from 'nanoid';
-import http from "http";
-
-
-let app = http.createServer();
-const wss = new WebSocketServer({noServer:true});
+import { checktype,decodeFromBlob} from '../utils/index.js';
+import { encode} from 'msgpack-lite';
+import { Fastee } from "fasteejs"; 
+import colors from "kleur";
+import ip from "./ip.js";
 let Emmiter = new EventEmitter();
 
-async function genId(ws,req){
-  const ip = req.socket.remoteAddress || req.headers['x-forwarded-for'].split(',')[0].trim();
-  ws.ip = ip;
-  ws.id=nanoid(16)
-  return ws
-}
-
-function createRealtor(opts){
-  if(opts && checktype(opts) === checktype({})){
-    
-    let port = Number(opts.port) || 5554;
-    let server = opts.server;
-
+const wss = new WebSocketServer({noServer:true});
+function init(wss,server){
     if(server && checktype(server) === checktype({}) && server.on){
      //valid server supplied
      //
      server.on('upgrade', function upgrade(request,socket, head) {
+
         wss.handleUpgrade(request,socket, head, async function done(ws) {
           //
-          wss.emit('connection', await genId(ws,request), request);
+          ws.on('error',(e)=>{
+          });
+          ws.on('close',()=>{
+              ws.terminate();
+           })
+           let meta;
+           ws.on("message",async (msg)=>{
+            Emmiter.emit("custom_msg",msg)
+           let m = await decodeFromBlob(msg) 
+           if(m.event === "setup_init"){
+              ws.id = m.data.device_id;
+              ws.ip = ip().get_ip(request)
+              meta=m
+              wss.emit('connection',ws, request,meta);
+           }
+    
+           }) 
+        
         });
       });
       //log
+      console.log(`${colors.bold().green("[realtor]:")} realtime running on\n 
+       ${"ws://localhost or wss://localhost"}
+      `)
      
-    }else{
-      //no server supplied
-      //init new server
-      detect(port)
-      .then(_port => {
-    if(port === _port) {
-      //port not occupied
-      app.listen(port,'127.0.0.1',(err)=>{
-         if(err){
-          logError(err)
-          return
-         }//handle upgrade
-         app.on('upgrade', function upgrade(request,socket, head) {
-          //middlewares soon
-            wss.handleUpgrade(request,socket, head, async function done(ws) {
-              wss.emit('connection',await genId(ws,request), request);
-            });
-          });
-          //log
-         logSucces(port)
-        }) 
-    } else { 
-      //try another port
-      app.listen(_port,'127.0.0.1',(err)=>{
-        if(err){
-         logError(err)
-         return
-        }//handle upgrade
-        app.on('upgrade', function upgrade(request, socket, head) {
-           wss.handleUpgrade(request,socket, head, async function done(ws) {
-             wss.emit('connection', await genId(ws,request), request);
-           });
-         });
-         //log
-        logSucces(_port)
-       }) 
-
-    
-    }//
-    }) 
-  .catch(err => {
-    logError(err);
-  });
-       
     }
   
-    //
-    let realtor ={}
-    //room
-    realtor.Room = class Room{
-      constructor(room){
-      if(room && typeof room === 'string' && room.length > 0 && room.startsWith('/')){
-        this.room = room
-        wss.path = room
-        this.wss=wss;
-        //err
-        wss.on('error',async (e)=>{
-          if(e){
-            Emmiter.emit('error',{error:e})
-          }
-        })
-        //return current;
-        this.conect = conect
-         this.onError = async function(cb){
-          Emmiter.on('error',(e)=>{
-            return cb(e)
-          })
-         }
-       
-          
-      }
-      
-     }
-        
-    }
-    return realtor
-  }else{
-    return {
-      iserror:true,
-      msg:'valid options required [server]or [port],{server:server,port:8090}'
-    }
-  }
+}
+function verify(path){
+ if(path && path.startsWith("/")){
+  wss.path =path
+ }else{
+  wss.path = `/${path}` 
+ }
 }
 
-export {
-  createRealtor
+class Room{
+  client = null
+  constructor(path="/"){
+    if(!path || typeof path !== "string" || path.length === 0){
+      throw new Error("realtor: Room requires valid path")
+    }
+    verify(path)
+   this.room = path;
+   this.clients = wss.clients
+   wss.on('connection', function connection(ws,req,meta) {
+   
+    ws.on('error',(e)=>{
+    });
+    ws.on('close',()=>{
+        ws.terminate();
+     })
+     if (ws.readyState === ws.OPEN){
+        Emmiter.emit("connected",ws)
+      } 
+
+     })
+   
+  
+  }
+  on(ev="",cb){
+    if(ev && typeof ev === 'string' && ev.length >0 && cb && typeof cb === 'function'){
+     
+      Emmiter.on("connected",(socket)=>{
+        if (socket.readyState === socket.OPEN){
+        socket.on('message',async (msg)=>{
+        let {event,data} = await decodeFromBlob(msg);
+        this.client={
+          data,
+          ws:socket,
+          id:socket.id,
+        }
+       if(ev === event)cb(this);
+      })
+    }
+    })
+  }
+   }
+   emit(event="",data={},cb){
+    if(event && typeof event === 'string' && event.length > 0 && data && checktype(data) === checktype({}) && cb && typeof cb === 'function'){
+      if(!this.client && !this.client){
+        wss.on('connection',(ws)=>{
+        if (ws.readyState === ws.OPEN){
+          //
+             ws.send(encode({event,socketid:ws.id,data}))
+            return cb({iserror:false,msg:'success'})
+           
+         
+       }else{
+         return cb({iserror:true,msg:'not sent'})
+       }
+      })
+      return
+      }
+  //on trick
+    if(this.client.ws && this.client.data && this.client.ws.readyState == this.client.ws.OPEN){
+          this.client.ws.send(encode({event,socketid:this.client.ws.id,data}))
+         return cb({iserror:false,msg:'success'})
+        
+      
+    }else{
+      return cb({iserror:true,msg:'not sent'})
+    }
+ 
+ }}
+ broadcast(event="",data,cb){
+  
+  if(event && typeof event === 'string' && event.length > 0 && data && checktype(data) === checktype({}) && cb && typeof cb === 'function'){
+    //trick for on listener
+    if(this.client && this.client.data && this.clients){
+      this.clients.forEach(cli=>{
+      if (cli.readyState == cli.OPEN){
+           cli.send(encode({event,socketid:cli.id,data:data}))
+          return cb({iserror:false,msg:'success'})
+     }else{
+       return cb({iserror:true,msg:'not sent'})
+     }
+    })
+   return
+  }//
+    wss.on('connection',(ws)=>{
+      wss.clients.forEach(cli=>{
+        if (cli.readyState == cli.OPEN){
+             cli.send(encode({event,socketid:cli.id,data:data}))
+            return cb({iserror:false,msg:'success'})
+       }else{
+         return cb({iserror:true,msg:'not sent'})
+       }
+      })
+    })
+  
+   }
+ }
+ broadcastAll(event="",data={},cb){
+  if(event && typeof event === 'string' && event.length >0 && data && checktype(data) === checktype({}) && cb && typeof cb === 'function'){
+   
+    //trick for on listener
+    if(this.client && this.client.data && this.clients){
+      this.clients.forEach(cli=>{
+      if (cli !== this.client.ws && cli.readyState == cli.OPEN){
+           cli.send(encode({event,socketid:cli.id,data:data}))
+          return cb({iserror:false,msg:'success'})
+     }else{
+       return cb({iserror:true,msg:'not sent'})
+     }
+    })
+    return
+    }
+    
+    wss.on('connection',(ws)=>{
+      wss.clients.forEach(cli=>{
+        if (cli !== ws && cli.readyState == cli.OPEN){
+             cli.send(encode({event,socketid:cli.id,data:data}))
+            return cb({iserror:false,msg:'success'})
+       }else{
+         return cb({iserror:true,msg:'not sent'})
+       }
+      })
+    })
+  
+   }
+ }
+ broadcastTo(id="",event="",data={},cb){
+  if(!id || typeof id !== "string" || id.length === 0){
+    throw new Error("realtor: broadcastTo requires id,event,data and cb")
+  }
+  if(!event || typeof event !== "string" || event.length === 0){
+    throw new Error("realtor: broadcastTo requires id,event,data and cb")
+  }
+  if(!data || checktype(data) !== checktype({})){
+    throw new Error("realtor: broadcastTo requires id,event,data and cb")
+  }
+  if(!cb || checktype(cb) !== "function"){
+    throw new Error("realtor: broadcastTo requires id,event,data and cb")
+  }
+
+  //trick for on listener
+  if(this.client && this.client.data && this.clients){
+    this.clients.forEach(cli=>{
+    if (cli.id === id && cli.readyState == cli.OPEN){
+         cli.send(encode({event:event,socketid:cli.id,data:data}))
+        return cb({iserror:false,msg:'success'})
+   }else{
+     return cb({iserror:true,msg:'not sent'})
+   }
+  })
+  return
+  }
+  
+  wss.on('connection',(ws)=>{
+    wss.clients.forEach(cli=>{
+      if (cli.id === id && cli.readyState == cli.OPEN){
+           cli.send(encode({event:event,socketid:cli.id,data:data}))
+          return cb({iserror:false,msg:'success'})
+     }else{
+       return cb({iserror:true,msg:'not sent'})
+     }
+    })
+  })
+ }
+ broadcastToMany(ids=[],event="",data={},cb){
+  if(!ids || checktype(ids) !== checktype([]) || ids.length === 0){
+    throw new Error("realtor: broadcastToMany requires ids,event,data and cb")
+  }
+  if(!event || typeof event !== "string" || event.length === 0){
+    throw new Error("realtor: broadcastToMany requires ids,event,data and cb")
+  }
+  if(!data || checktype(data) !== checktype({})){
+    throw new Error("realtor: broadcastTo requires ids,event,data and cb")
+  }
+  if(!cb || checktype(cb) !== "function"){
+    throw new Error("realtor: broadcastTo requires ids,event,data and cb")
+  }
+
+ids.map((id)=>{
+  this.broadcastTo(id,event,data,cb)
+})
+ 
+ }
+ getAllkeys(cb){
+  if(!cb && typeof cb !== "function"){
+    throw new Error("realtor: getAllkeys requires cb")
+  }
+  let keys=new Map();
+
+  if(this.clients && this.clients.size > 0){
+    wss.clients.forEach(c=>{
+      keys.set(c.id)
+     })
+
+ let key =[]
+ for(let k of keys.keys()){
+   key.push(k)
+ }
+ cb(key)
+
+    return
+  }else{
+    wss.on("connection",(socket,req)=>{
+      socket.on("error",()=>{
+        keys.delete(socket.id)
+      })
+      socket.on("close",()=>{
+        keys.delete(socket.id)
+      })
+      wss.clients.forEach(c=>{
+       keys.set(c.id)
+      })
+     Emmiter.emit("keys_internal",keys.keys())
+   })
+Emmiter.on("keys_internal",(data)=>{
+  let key =[]
+  for(let k of data){
+    key.push(k)
+  }
+  cb(key)
+})}
+ }
+}
+
+
+export class Realtor extends Fastee{
+ constructor(opts={port:5554}){
+  super(opts)
+  if(opts && checktype(opts) === checktype({})){
+    if(opts.port && typeof opts.port !== "number"){
+      throw new Error("realtor: port must be valid port number")
+    }
+    if(opts.server && checktype(opts.server)  !== checktype({})){
+      throw new Error("realtor: server must be valid running http server")
+    }
+   init(wss,this.server)
+  }else{
+    throw new Error("realtor: opts object required ie {port:3000,server:server} valid running server")
+  }
+  this.Room = Room;
+ }
 }

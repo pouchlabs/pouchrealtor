@@ -42,12 +42,17 @@ async function decodeFromBlob(blob) {
 }
 
 function logSucces(port){
-  let msg = `[${kleur.bold().green('pouchrealtor')}]: server listening on: \nws://localhost:${kleur.blue(port)} \nwss://localhost:${kleur.blue(port)} `
+  let msg = `[${kleur.bold().green('realtor')}]: server listening on: \nws://localhost:${kleur.blue(port)} \nwss://localhost:${kleur.blue(port)} `
   console.log(msg)
 }
 function logError(err){
-  let msg = `[${kleur.bold().red('pouchrealtor')}]: error occured \n ${err}} `
+  let msg = `[${kleur.bold().red('realtor')}]: error occured \n ${err}} `
   console.log(msg)
 } 
-
-export {checktype,logSucces,logError,decodeFromBlob}
+const getUniqueID = function () {
+  function s4() {
+      return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
+  }
+  return s4() + s4() + '-' + s4();
+};
+export {checktype,logSucces,logError,decodeFromBlob,getUniqueID}

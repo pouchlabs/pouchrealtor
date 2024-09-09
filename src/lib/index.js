@@ -1,3 +1,2 @@
-import {createRealtor}  from "./core/entry.js"; 
-import { CreateClient } from "./client/realtor.js";
-export {createRealtor,CreateClient};
+import {Realtor}  from "./core/entry.js"; 
+export {Realtor};
